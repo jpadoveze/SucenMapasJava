@@ -6,7 +6,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.Manifest;
 import android.view.View;
-import android.widget.Button;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -42,8 +41,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 99;
     private GoogleMap mMap;
-    private ActivityMapsBinding binding;
-    private List<Marker> markers = new ArrayList<>();
+    private final List<Marker> markers = new ArrayList<>();
 
     private FusedLocationProviderClient mFusedLocationClient;
 
@@ -51,7 +49,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        binding = ActivityMapsBinding.inflate(getLayoutInflater());
+        com.example.sucenmapasjava.databinding.ActivityMapsBinding binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -85,8 +83,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(tupa, 16));
         // Adicione a camada GeoJSON ao mapa
         try {
-            GeoJsonLayer layer = new GeoJsonLayer(mMap, R.raw.quarteirao_tupa_geojson, getApplicationContext());
-            layer.addLayerToMap();
+            // Criando a camadada para as quadras (Tupã)
+            GeoJsonLayer layerQuarteirao = new GeoJsonLayer(mMap, R.raw.quarteirao_tupa_geojson, getApplicationContext());
+            layerQuarteirao.addLayerToMap();
+
+            // Criando a camadada para os Censitários (Tupã)
+            GeoJsonLayer layerCensitario = new GeoJsonLayer(mMap, R.raw.censitario_tupa_geojson, getApplicationContext());
+            layerCensitario.addLayerToMap();
 
             // Inicialize o IconGenerator
             IconGenerator iconGenerator = new IconGenerator(getApplicationContext());
@@ -94,8 +97,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // Defina o plano de fundo do marcador como transparente
             iconGenerator.setBackground(null);
 
-            // Adicione o ID no centro de cada polígono
-            for (GeoJsonFeature feature : layer.getFeatures()) {
+            // Adicione o ID no centro de cada polígono quadras
+            for (GeoJsonFeature feature : layerQuarteirao.getFeatures()) {
                 String id = feature.getProperty("ID");
                 GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeometry();
                 LatLng centroid = calculateCentroid(polygon);
@@ -103,6 +106,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 // Crie um ícone personalizado com o ID como texto
                 //iconGenerator.setTextAppearance(R.style.MarkerTextStyle);
                 Bitmap iconBitmap = iconGenerator.makeIcon(id);
+
+                Marker marker = mMap.addMarker(new MarkerOptions()
+                        .position(centroid)
+                        .icon(BitmapDescriptorFactory.fromBitmap(iconBitmap)));
+                markers.add(marker);
+            }
+
+            // Adicione o ID no centro de cada polígono censitarios
+            for (GeoJsonFeature feature : layerCensitario.getFeatures()) {
+                String geocodi = feature.getProperty("CD_GEOCODI");
+                GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeometry();
+                LatLng centroid = calculateCentroid(polygon);
+
+                // Crie um ícone personalizado com o ID como texto
+                //iconGenerator.setTextAppearance(R.style.MarkerTextStyle);
+                Bitmap iconBitmap = iconGenerator.makeIcon(geocodi);
 
                 Marker marker = mMap.addMarker(new MarkerOptions()
                         .position(centroid)

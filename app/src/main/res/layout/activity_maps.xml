@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MapsActivity">
+    tools:context=".MapsActivity"
+    tools:layout="@android:layout/simple_gallery_item">
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/map"
@@ -17,7 +18,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
-        tools:context=".MapsActivity" />
+        tools:context=".MapsActivity"
+        tools:layout="@android:layout/simple_gallery_item" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/gps_button"
