@@ -2,6 +2,7 @@ package com.example.sucenmapasjava;
 
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.Manifest;
@@ -28,6 +29,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.maps.android.data.geojson.GeoJsonFeature;
 import com.google.maps.android.data.geojson.GeoJsonLayer;
 import com.google.maps.android.data.geojson.GeoJsonPolygon;
+import com.google.maps.android.data.geojson.GeoJsonPolygonStyle;
 import com.google.maps.android.ui.IconGenerator;
 
 import org.json.JSONException;
@@ -92,20 +94,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             layerCensitario.addLayerToMap();
 
             // Inicialize o IconGenerator
-            IconGenerator iconGenerator = new IconGenerator(getApplicationContext());
+            IconGenerator iconQuarteirao = new IconGenerator(getApplicationContext());
+            IconGenerator iconCensitario = new IconGenerator(getApplicationContext());
 
             // Defina o plano de fundo do marcador como transparente
-            iconGenerator.setBackground(null);
+            iconQuarteirao.setBackground(null);
+            iconCensitario.setBackground(null);
+
+            // Personalize o estilo do texto do IconGenerator
+            iconQuarteirao.setTextAppearance(R.style.QuarteiraoTextStyle);
+            iconCensitario.setTextAppearance(R.style.CensitarioTextStyle);
+
+            // Alterando a cor da linha dos polígonos da camada layerQuarteirao
+            GeoJsonPolygonStyle quarteiraoStyle = new GeoJsonPolygonStyle();
+            quarteiraoStyle.setStrokeColor(Color.argb(80, 45, 156, 216)); // Defina a cor da linha para vermelho
 
             // Adicione o ID no centro de cada polígono quadras
             for (GeoJsonFeature feature : layerQuarteirao.getFeatures()) {
                 String id = feature.getProperty("ID");
                 GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeometry();
                 LatLng centroid = calculateCentroid(polygon);
+                feature.setPolygonStyle(quarteiraoStyle);
 
                 // Crie um ícone personalizado com o ID como texto
                 //iconGenerator.setTextAppearance(R.style.MarkerTextStyle);
-                Bitmap iconBitmap = iconGenerator.makeIcon(id);
+                Bitmap iconBitmap = iconQuarteirao.makeIcon(id);
 
                 Marker marker = mMap.addMarker(new MarkerOptions()
                         .position(centroid)
@@ -113,15 +126,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 markers.add(marker);
             }
 
+            // Alterando a cor da linha dos polígonos da camada layerQuarteirao
+            GeoJsonPolygonStyle censitarioStyle  = new GeoJsonPolygonStyle();
+            censitarioStyle.setStrokeColor(Color.argb(80, 245, 124, 0)); // Defina a cor da linha para vermelho
+
             // Adicione o ID no centro de cada polígono censitarios
             for (GeoJsonFeature feature : layerCensitario.getFeatures()) {
                 String geocodi = feature.getProperty("CD_GEOCODI");
                 GeoJsonPolygon polygon = (GeoJsonPolygon) feature.getGeometry();
                 LatLng centroid = calculateCentroid(polygon);
+                feature.setPolygonStyle(censitarioStyle);
 
                 // Crie um ícone personalizado com o ID como texto
                 //iconGenerator.setTextAppearance(R.style.MarkerTextStyle);
-                Bitmap iconBitmap = iconGenerator.makeIcon(geocodi);
+                Bitmap iconBitmap = iconCensitario.makeIcon(geocodi);
 
                 Marker marker = mMap.addMarker(new MarkerOptions()
                         .position(centroid)
