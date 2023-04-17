@@ -7,6 +7,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.Manifest;
 import android.view.View;
+import android.widget.Button;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -21,6 +22,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -46,6 +48,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private final List<Marker> markers = new ArrayList<>();
 
     private FusedLocationProviderClient mFusedLocationClient;
+
+    private boolean poisVisible = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,9 +84,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Tupa and move the camera
+        // Move a câmera para Tupã - SP
         LatLng tupa = new LatLng(-21.935, -50.513889);
+
+        // Ajusta o zoom inicial
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(tupa, 16));
+
+        // Carregue o estilo personalizado do arquivo JSON
+        MapStyleOptions mapStyle = MapStyleOptions.loadRawResourceStyle(this, R.raw.hide_pois_style);
+
+        // Aplique o estilo ao mapa
+        mMap.setMapStyle(mapStyle);
+
         // Adicione a camada GeoJSON ao mapa
         try {
             // Criando a camadada para as quadras (Tupã)
@@ -147,6 +160,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 markers.add(marker);
             }
 
+            Button togglePoisButton = findViewById(R.id.toggle_pois_button);
+            togglePoisButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    togglePoisVisibility();
+                }
+            });
+
+
         } catch (JSONException | IOException e) {
             e.printStackTrace();
         }
@@ -198,6 +220,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             });
         }
+    }
+
+    // Controla a visibilidade dos pontos de interesse
+    private void togglePoisVisibility() {
+        poisVisible = !poisVisible;
+        int styleResId = poisVisible ? R.raw.show_pois_style : R.raw.hide_pois_style;
+        MapStyleOptions mapStyle = MapStyleOptions.loadRawResourceStyle(this, styleResId);
+        mMap.setMapStyle(mapStyle);
     }
 
 }
